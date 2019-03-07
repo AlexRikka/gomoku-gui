@@ -11,7 +11,7 @@ public class GameScreen implements Screen {
 
     public GameScreen(final GomokuGame gam) {
         this.game = gam;
-        field = new Texture("field2.jpg");
+        field = new Texture("field2.png");
     }
 
     @Override

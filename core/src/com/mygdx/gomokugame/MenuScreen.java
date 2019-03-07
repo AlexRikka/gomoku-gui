@@ -9,6 +9,10 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import org.lwjgl.util.Rectangle;
 
 public class MenuScreen implements Screen {
@@ -17,8 +21,11 @@ public class MenuScreen implements Screen {
     //SpriteBatch batch;
     Texture img, img2;
     Sprite sprite;
-    OrthographicCamera cam;
     Rectangle Tbounds, Inbounds;
+    TextButton tbStart;
+    TextButton.TextButtonStyle tbsBlack, tbsWhite;
+    Skin buttonSkin;
+    TextureAtlas MenuAtlas;
 
     static float W, H, pX, pY;
     boolean was_t;
@@ -31,11 +38,15 @@ public class MenuScreen implements Screen {
         H = 200;
         pX = 300;
         pY = 300;
-        //cam = new OrthographicCamera(400, 400);
-        //cam.position.set(200, 200, 0);
         img2 = new Texture("yungi.jpg");
-        Tbounds = new Rectangle((int) pX, (int) pY, (int) W, (int) H);
+        Tbounds = new Rectangle((int)pX, (int)pY, (int)W, (int)H);
         was_t = false;
+        MenuAtlas = new TextureAtlas(Gdx.files.internal("gomoku.pack"));
+        buttonSkin = new Skin(MenuAtlas);
+        tbsBlack.over = buttonSkin.getDrawable("black_circle");
+        tbStart = new TextButton("Start", tbsBlack);
+        tbStart.setPosition(300, 300);
+        tbStart.setSize(200, 200);
     }
 
     @Override
@@ -46,19 +57,16 @@ public class MenuScreen implements Screen {
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        //cam.update();
-        //batch.setProjectionMatrix(cam.combined);
         game.batch.begin(); //начать отрисовку
-     /*   batch.disableBlending();
-        sprite.draw(batch);
-        batch.enableBlending();*/
-        //batch.draw(img, W, H);
-        game.batch.draw(img, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); // растягивает текстуру до границ экрана
+        //game.batch.draw(img, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); // растягивает текстуру до границ экрана
         game.batch.draw(img2, pX, pY, W, H);
+        tbStart.draw(game.batch, delta);
         game.batch.end(); //закончить отрисовку
-        if (Gdx.input.isTouched()) {
-            game.setScreen(new GameScreen(game));
-            dispose();
+        if (Gdx.input.justTouched()) {
+            if (Tbounds.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY())) {
+                game.setScreen(new GameScreen(game));
+                dispose();
+            }
         }
        /* if (Gdx.input.justTouched()) {
 
@@ -82,6 +90,7 @@ public class MenuScreen implements Screen {
         }*/
         //if(Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) W = 0;
         //if(Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) W = 400;
+
     }
 
     @Override
