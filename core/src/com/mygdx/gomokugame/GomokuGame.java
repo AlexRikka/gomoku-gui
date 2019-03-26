@@ -13,6 +13,7 @@ public class GomokuGame extends Game {
 		// Use LibGDX's default Arial font.
 		font = new BitmapFont();
 		this.setScreen(new MenuScreen(this));
+		//this.setScreen(new GameScreen(this));
 	}
 
 	public void render() {

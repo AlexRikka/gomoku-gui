@@ -5,92 +5,115 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.lwjgl.util.Rectangle;
 
 public class MenuScreen implements Screen {
     final GomokuGame game;
 
-    //SpriteBatch batch;
-    Texture img, img2;
-    Sprite sprite;
-    Rectangle Tbounds, Inbounds;
-    TextButton tbStart;
+    Stage stage;
+    Texture background1;
+    BitmapFont font;
+    TextButton tbStart, tbSettings, tbStatistics, tbExit;
     TextButton.TextButtonStyle tbsBlack, tbsWhite;
     Skin buttonSkin;
     TextureAtlas MenuAtlas;
 
-    static float W, H, pX, pY;
+    static float bW, bH, pX, pY;
     boolean was_t;
 
     public MenuScreen(final GomokuGame gam){
         this.game = gam;
         game.batch = new SpriteBatch();
-        img = new Texture("crytae.jpg");
-        W = 200;
-        H = 200;
-        pX = 300;
-        pY = 300;
-        img2 = new Texture("yungi.jpg");
-        Tbounds = new Rectangle((int)pX, (int)pY, (int)W, (int)H);
-        was_t = false;
-        MenuAtlas = new TextureAtlas(Gdx.files.internal("gomoku.pack"));
-        buttonSkin = new Skin(MenuAtlas);
-        tbsBlack.over = buttonSkin.getDrawable("black_circle");
-        tbStart = new TextButton("Start", tbsBlack);
-        tbStart.setPosition(300, 300);
-        tbStart.setSize(200, 200);
+
+        stage = new Stage(new ScreenViewport(), game.batch);
+        Gdx.input.setInputProcessor(stage);
+
+        background1 = new Texture("bckpln5.png");
+        bW = 200;
+        bH = 200;
+        pX = (Gdx.graphics.getWidth()/2) - bW/2;
+        pY = Gdx.graphics.getHeight()/2;
+        MenuAtlas = new TextureAtlas(Gdx.files.internal("bmenu.pack"));
+        buttonSkin = new Skin();
+        buttonSkin.addRegions(MenuAtlas);
     }
 
-    @Override
-    public void show() {}
 
+    @Override
+    public void show() {
+        //button style
+        tbsBlack = new TextButton.TextButtonStyle();
+        tbsBlack.font = new BitmapFont(Gdx.files.internal("menuf.fnt"));
+        tbsBlack.up = buttonSkin.getDrawable("black-circle-200");
+        tbsBlack.over = buttonSkin.getDrawable("black-circle-p-200");
+        //tbsBlack.down = buttonSkin.getDrawable("black-circle");
+        //tbsBlack.checked = buttonSkin.getDrawable("white-circle");
+        tbsWhite = new TextButton.TextButtonStyle();
+        tbsWhite.font = new BitmapFont(Gdx.files.internal("menufb.fnt"));
+        tbsWhite.up = buttonSkin.getDrawable("white-circle-200");
+        tbsWhite.over = buttonSkin.getDrawable("white-circle-over-200");
+
+        //tb start
+        tbStart = new TextButton("Start", tbsBlack);
+        tbStart.setPosition(pX, pY + 170);
+        tbStart.setSize(bW, bH);
+        stage.addActor(tbStart);
+        tbStart.addListener(new InputListener(){
+            @Override
+            public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
+                game.setScreen(new GameScreen(game));
+                dispose();
+                return true;
+            }
+        });
+
+        //tb statistics
+        tbStatistics = new TextButton("Statistics", tbsWhite);
+        tbStatistics.setPosition(pX, pY);
+        tbStatistics.setSize(bW, bH);
+        stage.addActor(tbStatistics);
+
+        //tb settings
+        tbSettings = new TextButton("Settings", tbsBlack);
+        tbSettings.setPosition(pX, pY - 170);
+        tbSettings.setSize(bW, bH);
+        stage.addActor(tbSettings);
+
+        //tb exit
+        tbExit = new TextButton("Exit", tbsWhite);
+        tbExit.setPosition(pX, pY - 170*2);
+        tbExit.setSize(bW, bH);
+        stage.addActor(tbExit);
+
+    }
 
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        game.batch.begin(); //начать отрисовку
-        //game.batch.draw(img, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); // растягивает текстуру до границ экрана
-        game.batch.draw(img2, pX, pY, W, H);
-        tbStart.draw(game.batch, delta);
-        game.batch.end(); //закончить отрисовку
-        if (Gdx.input.justTouched()) {
+        stage.act();
+        stage.getBatch().begin(); //начать отрисовку
+        stage.getBatch().draw(background1, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); // растягивает текстуру до границ экрана
+        stage.getBatch().end(); //закончить отрисовку
+        stage.draw();
+        /*if (Gdx.input.justTouched()) {
             if (Tbounds.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY())) {
                 game.setScreen(new GameScreen(game));
                 dispose();
             }
-        }
-       /* if (Gdx.input.justTouched()) {
-
-            if (was_t) {
-                if (Tbounds.contains(Gdx.input.getX(), Gdx.input.getY())) {
-                    W -= 200;
-                    H -= 200;
-                    pX += 100;
-                    pY += 100;
-                    was_t = false;
-                }
-            } else {
-                if (Tbounds.contains(Gdx.input.getX(), Gdx.input.getY())) {
-                    was_t = true;
-                    W += 200;
-                    H += 200;
-                    pX -= 100;
-                    pY -= 100;
-                }
-            }
         }*/
-        //if(Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) W = 0;
-        //if(Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) W = 400;
-
     }
 
     @Override
@@ -115,5 +138,6 @@ public class MenuScreen implements Screen {
 
     @Override
     public void dispose() {
+
     }
 }
